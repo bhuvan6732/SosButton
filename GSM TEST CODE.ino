@@ -1,21 +1,18 @@
-#include <SoftwareSerial.h>
-SoftwareSerial mySerial(3, 2); // RX, TX
+
 
 void setup()
 {
-    // put your setup code here, to run once:
+    // initialize serial communications at 9600 bps:
     Serial.begin(9600);
-    mySerial.begin(9600);
+
+    delay(10000);
+    // print the serial data to GSM
+    Serial.print("ATD9999999999;"); // change here to call a number using SIM800
+    // wait 10 seconds before the next loop
+    delay(10000);
+    Serial.print("ATH"); // hold the call
 }
 
 void loop()
 {
-    if (mySerial.available())
-    {
-        Serial.write(mySerial.read());
-    }
-    if (Serial.available())
-    {
-        mySerial.write(Serial.read());
-    }
 }
