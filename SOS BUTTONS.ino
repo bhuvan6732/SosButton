@@ -1,58 +1,50 @@
+#include <LiquidCrystal.h>
 #include <TinyGPS++.h>
-
-TinyGPSPlus gps;
-
 #include <SoftwareSerial.h>
-SoftwareSerial mySerial(3, 2);
-SoftwareSerial mySerial1(4, 5);
-char msg;
-char call;
-
+static const int RXPin = 2, TXPin = 3;
+static const uint32_t gps_baudrate = 9600;
+TinyGPSPlus gps;
+SoftwareSerial soft(RXPin, TXPin);
+String textMessage;
 float Lat, Lon;
 void setup()
 {
-  mySerial.begin(9600);
-  mySerial1.begin(38400);
+  soft.begin(gps_baudrate);
   Serial.begin(19200);
   pinMode(12, INPUT);
-  pinMode(9, OUTPUT);
+  pinMode(4, OUTPUT);
 }
 void loop()
 {
   int key = digitalRead(12);
-
-  while (mySerial1.available() > 0)
+  while (soft.available() > 0)
   {
-    gps.encode(mySerial1.read());
+    gps.encode(soft.read());
     if (gps.location.isUpdated())
     {
       Lat = gps.location.lat();
       Lon = gps.location.lng();
     }
+    else
+      ;
   }
-
-  if (key == 0)
+  if (key == 1)
   {
-    Serial.println("Setting the GSM in text mode");
-    digitalWrite(9, HIGH);
+    digitalWrite(4, HIGH);
     sendsms();
-    digitalWrite(9, LOW);
+    digitalWrite(4, LOW);
   }
 }
 void sendsms()
 {
-
-  Serial.println("Setting the GSM in text mode");
-  mySerial.println("AT+CMGF=1\r");
-  delay(2000);
-  Serial.println("Sending SMS to the desired phone number!");
-  mySerial.println("AT+CMGS=\"+919999999999\"\r");
-  // Replace x with mobile number
-  delay(2000);
-  // mySerial.println("Help me please");
-  String msg = "I want Help !!!Location: Lat: " + String(Lat) + " Lon: " + String(Lon);
-  mySerial.println(msg);
-  delay(200);
-  mySerial.println((char)26); // ASCII code of CTRL+Z
-  delay(2000);
+  Serial.print("AT+CMGF=1\r");
+  delay(100);
+  Serial.println("AT+CMGS =\"+9199999999\"");
+  delay(100);
+  Serial.println("I want Help !!!Location:" + String("Lat: ") + String(Lat) + " " + String("Lon: ") + String(Lon));
+  delay(100);
+  Serial.println((char)26);
+  delay(100);
+  Serial.println();
+  delay(5000);
 }
