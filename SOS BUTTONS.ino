@@ -1,50 +1,31 @@
-#include <LiquidCrystal.h>
-#include <TinyGPS++.h>
 #include <SoftwareSerial.h>
-static const int RXPin = 2, TXPin = 3;
-static const uint32_t gps_baudrate = 9600;
-TinyGPSPlus gps;
-SoftwareSerial soft(RXPin, TXPin);
-String textMessage;
-float Lat, Lon;
+
+SoftwareSerial gsmSerial(3, 2); // RX, TX
+
 void setup()
 {
-  soft.begin(gps_baudrate);
-  Serial.begin(19200);
-  pinMode(12, INPUT);
-  pinMode(4, OUTPUT);
+   gsmSerial.begin(9600); // Setting the baud rate of GSM Module
+   Serial.begin(9600);    // Setting the baud rate of Serial Monitor (Arduino)
+   delay(1000);
+   Serial.println("Preparing to send SMS");
+   SendMessage();
 }
+
 void loop()
 {
-  int key = digitalRead(12);
-  while (soft.available() > 0)
-  {
-    gps.encode(soft.read());
-    if (gps.location.isUpdated())
-    {
-      Lat = gps.location.lat();
-      Lon = gps.location.lng();
-    }
-    else
-      ;
-  }
-  if (key == 1)
-  {
-    digitalWrite(4, HIGH);
-    sendsms();
-    digitalWrite(4, LOW);
-  }
 }
-void sendsms()
+void SendMessage()
 {
-  Serial.print("AT+CMGF=1\r");
-  delay(100);
-  Serial.println("AT+CMGS =\"+919999999999\"");
-  delay(100);
-  Serial.println("I want Help !!!Location:" + String("Lat: ") + String(Lat) + " " + String("Lon: ") + String(Lon));
-  delay(100);
-  Serial.println((char)26);
-  delay(100);
-  Serial.println();
-  delay(5000);
+   Serial.println("Setting the GSM in text mode");
+   gsmSerial.println("AT+CMGF=1\r");
+   delay(2000);
+   Serial.println("Sending SMS to the desired phone number!");
+   gsmSerial.println("AT+CMGS=\"+919999999999\"\r");
+   // Replace x with mobile number
+   delay(2000);
+
+   gsmSerial.println("Hello from SIM900"); // SMS Text
+   delay(200);
+   gsmSerial.println((char)26); // ASCII code of CTRL+Z
+   delay(2000);
 }
