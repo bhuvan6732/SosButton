@@ -1,5 +1,5 @@
 #include <SoftwareSerial.h>
-SoftwareSerial mySerial(3, 2);
+SoftwareSerial mySerial(9, 10);
 char msg;
 char call;
 
@@ -18,7 +18,7 @@ void setup()
   Serial.println("c : to make a call");
   Serial.println("e : to redial");
   Serial.println();
-  delay(1000);
+  delay(100);
 }
 void loop()
 {
@@ -45,19 +45,16 @@ void loop()
 void SendMessage()
 
 {
+  mySerial.println("AT+CMGF=1");               // Sets the GSM Module in Text Mode
+  delay(1000);                                 // Delay of 1000 milli seconds or 1 second
+  mySerial.println("AT+CMGS=\"9999999999\"r"); // Replace x with mobile number
+  delay(1000);
 
-  Serial.println("Setting the GSM in text mode");
-  mySerial.println("AT+CMGF=1\r");
-  delay(2000);
-  Serial.println("Sending SMS to the desired phone number!");
-  mySerial.println("AT+CMGS=\"+919999999999\"\r");
-  // Replace x with mobile number
-  delay(2000);
+  mySerial.println("sim900a sms"); // The SMS text you want to send
 
-  mySerial.println("Hello from SIM900"); // SMS Text
-  delay(200);
+  delay(100);
   mySerial.println((char)26); // ASCII code of CTRL+Z
-  delay(2000);
+  delay(1000);
 }
 
 void ReceiveMessage()
@@ -74,7 +71,7 @@ void ReceiveMessage()
 void MakeCall()
 
 {
-  mySerial.println("atd9999999999;"); // watch out here for semicolon at the end!!
+  mySerial.println("ATD9999999999;"); // watch out here for semicolon at the end!!
   Serial.println("Calling ");         // print response over serial port
   delay(1000);
 }
